@@ -16,7 +16,7 @@
 
 /* Function declaration. */
 
-int test_stuck_address(unsigned long volatile *bufa, size_t count);
+int test_stuck_address(unsigned long volatile *bufa, size_t count, size_t loops);
 int test_random_value(unsigned long volatile *bufa, unsigned long volatile *bufb, size_t count);
 int test_xor_comparison(unsigned long volatile *bufa, unsigned long volatile *bufb, size_t count);
 int test_sub_comparison(unsigned long volatile *bufa, unsigned long volatile *bufb, size_t count);

@@ -56,7 +56,7 @@ int compare_regions(ulv *bufa, ulv *bufb, size_t count) {
     return r;
 }
 
-int test_stuck_address(ulv *bufa, size_t count) {
+int test_stuck_address(ulv *bufa, size_t count, size_t loops) {
     ulv *p1 = bufa;
     unsigned int j;
     size_t i;
@@ -64,12 +64,14 @@ int test_stuck_address(ulv *bufa, size_t count) {
 
     printf("           ");
     fflush(stdout);
-    for (j = 0; j < 16; j++) {
+    for (j = 0; j < loops; j++) {
         printf("\b\b\b\b\b\b\b\b\b\b\b");
         p1 = (ulv *) bufa;
         printf("setting %3u", j);
         fflush(stdout);
         for (i = 0; i < count; i++) {
+            // on even increments: store memory address at its own memory address
+            // odd: store the complement of memory address
             *p1 = ((j + i) % 2) == 0 ? (ul) p1 : ~((ul) p1);
             *p1++;
         }

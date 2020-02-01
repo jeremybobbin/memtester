@@ -126,6 +126,7 @@ int main(int argc, char **argv) {
     int device_specified = 0;
     char *env_testmask = 0;
     ul testmask = 0;
+    size_t stuck_address_loops = 16;
 
     printf("memtester version " __version__ " (%d-bit)\n", UL_LEN);
     printf("Copyright (C) 2001-2012 Charles Cazabon.\n");
@@ -150,7 +151,8 @@ int main(int argc, char **argv) {
         printf("using testmask 0x%lx\n", testmask);
     }
 
-    while ((opt = getopt(argc, argv, "p:d:")) != -1) {
+    while ((opt = getopt(argc, argv, "p:d:s:")) != -1) {
+
         switch (opt) {
             case 'p':
                 errno = 0;
@@ -193,6 +195,10 @@ int main(int argc, char **argv) {
                     }
                 }
                 break;              
+	    case 's':
+		if ((stuck_address_loops = strtoul(optarg, NULL, 10)) < 0L)
+			stuck_address_loops = 16;
+		break;
             default: /* '?' */
                 usage(argv[0]); /* doesn't return */
         }
@@ -353,7 +359,7 @@ int main(int argc, char **argv) {
         } else {
             done_mem = 1;
             printf("\n");
-        }
+	}
     }
 
     if (!do_mlock) fprintf(stderr, "Continuing with unlocked memory; testing "
@@ -370,13 +376,15 @@ int main(int argc, char **argv) {
             printf("/%lu", loops);
         }
         printf(":\n");
-        printf("  %-20s: ", "Stuck Address");
-        fflush(stdout);
-        if (!test_stuck_address(aligned, bufsize / sizeof(ul))) {
-             printf("ok\n");
-        } else {
-            exit_code |= EXIT_FAIL_ADDRESSLINES;
-        }
+	if (stuck_address_loops) {
+		printf("  %-20s: ", "Stuck Address");
+		fflush(stdout);
+		if (!test_stuck_address(aligned, bufsize / sizeof(ul), stuck_address_loops)) {
+			printf("ok\n");
+		} else {
+			exit_code |= EXIT_FAIL_ADDRESSLINES;
+		}
+	}
         for (i=0;;i++) {
             if (!tests[i].name) break;
             /* If using a custom testmask, only run this test if the
